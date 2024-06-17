@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Clock</title>
+    <style>
+        html {
+            background: #eda201 url(http://unsplash.it/1500/1000/?image=881&blur=50);
+            background-size:cver;
+            font-family: Arial, Helvetica, sans-serif;
+            text-align: center;
+            font-size: 10px;
+
+        }
+
+        body {
+            font-size: 2rem;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+
+        .clock-container {
+            position:relative;
+            margin-bottom: 20px;
+        }
+
+        .clock {
+            width: 30rem;
+            height: 30rem;
+            border: 20px solid white;
+            border-radius: 50%;
+            position: relative;
+            padding: 2rem;
+            box-shadow: 0 0 0px 4px rgba(0, 0, 0, 0.1),
+                        inset 0 0 0 3px #EFEFEF,
+                        inset 0 0 10px black,
+                        0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .clock-face {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform: translateY(-3px);
+        }
+
+        .hand {
+            width: 50%;
+            height: 6px;
+            background: black;
+            position: absolute;
+            top: 50%;
+            transition: all 0.05s;
+            transition-timing-function: cubic-bezier(0.1, 2.7, 0.58, 1);
+            transition: transform 0.5s cubic-bezier(0.1, 2.7, 0.58, 1); /* Add transition property */
+        }
+
+        .second-hand {
+            transform-origin: right center;
+          
+        }
+
+        .min-hand {
+            transform-origin: right center;
+        }
+
+        .hour-hand {
+            transform-origin: right center;
+        }
+        .digital-clock {
+            font-size: 5rem;
+            margin-top: 1rem;
+           
+        }
+        .toggle-container{
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="clock-container">
+    <div class="clock">
+        <div class="clock-face">
+            <div class="hand hour-hand"></div>
+            <div class="hand min-hand"></div>
+            <div class="hand second-hand"></div>
+           
+        </div>
+    </div>
+    </div>
+    
+    <div class="clock-container">
+       <div class="digital-clock" id="digital-clock">Loading...</div>
+       <div class="toggle-container">
+            <label for="format-toggle">Toggle 24-Hour Format</label>
+            <input type="checkbox" id="format-toggle" onchange="toggleFormat()">
+       </div>
+    </div>
+    <script>
+        let is24HourFormat = false;
+        function setDate() {
+            const secondHand = document.querySelector('.second-hand');
+            const minHand = document.querySelector('.min-hand');
+            const hourHand = document.querySelector('.hour-hand');
+
+            if (!secondHand || !minHand || !hourHand) {
+                console.error("Clock hands not found!");
+                return;
+            }
+
+            const now = new Date();
+            const options ={
+                hour:is24HourFormat? '2-digit' : 'numeric',
+                minute: '2-digit',
+                hour12: !is24HourFormat
+            };
+            const seconds = now.getSeconds();
+            const secondsDegrees = ((seconds / 60) * 360) + 90;
+            secondHand.style.transform = `rotate(${secondsDegrees}deg)`;
+            adjustTransition(secondHand, secondsDegrees);
+
+            const min = now.getMinutes();
+            const minDegrees = ((min / 60) * 360) + 90;
+            minHand.style.transform = `rotate(${minDegrees}deg)`;
+            adjustTransition(minHand, minDegrees);
+
+            const hour = now.getHours();
+            const hourDegrees = ((hour / 12) * 360) + 90 + (min / 60) * 30; // Considering minute hand influence on hour hand
+            hourHand.style.transform = `rotate(${hourDegrees}deg)`;
+            adjustTransition(hourHand, hourDegrees);
+            updateDigitalClock(now);
+        }
+
+        function adjustTransition(hand, degrees) {
+            if (degrees === 90) {
+                hand.style.transition = 'none'; // Disable transition momentarily
+            } else {
+                hand.style.transition = 'all 0.05s cubic-bezier(0.1, 2.7, 0.58, 1)'; // Re-enable transition
+            }
+        }
+
+        function updateDigitalClock(now) {
+                    const digitalClock = document.getElementById('digital-clock');
+                    if (!digitalClock) {
+                        console.error("Digital clock element not found!");
+                        return;
+                    }
+
+                    const options = {  hour: is24HourFormat ? '2-digit' : 'numeric',
+                                    minute: '2-digit',
+                                    hour12: !is24HourFormat 
+                                    };
+                    const timeString = now.toLocaleTimeString('en-US', options);
+                    const locationString = now.toLocaleTimeString([], { timeZoneName: 'short' });
+                    digitalClock.textContent = `${timeString} (${locationString})`;
+                }
+        function toggleFormat() {
+            is24HourFormat = !is24HourFormat;
+            setDate();
+        }
+
+        setInterval(setDate, 1000);   
+    </script>
+</body>
+</html>
